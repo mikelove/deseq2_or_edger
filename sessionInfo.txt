@@ -1,0 +1,17 @@
+R version 3.3.1 (2016-06-21)
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+Running under: OS X 10.11.5 (El Capitan)
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] parallel  stats4    stats     graphics  grDevices datasets
+    utils     methods   base
+
+other attached packages:
+[1] edgeR_3.14.0               limma_3.28.21  DESeq2_1.12.4
+[4] SummarizedExperiment_1.2.3 Biobase_2.32.0 GenomicRanges_1.24.3
+[7] GenomeInfoDb_1.8.7         IRanges_2.6.1  S4Vectors_0.10.3
+[10] BiocGenerics_0.18.0       knitr_1.14     devtools_1.12.0
+[13] BiocInstaller_1.22.3
