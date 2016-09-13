@@ -1,4 +1,3 @@
-library("GenomicRanges")
 library("Biobase")
 library("SummarizedExperiment")
 load("bottomly_sumexp.RData")
@@ -29,8 +28,7 @@ lfcHeldout <- list()
 
 nreps <- 30
 
-#register(MulticoreParam(workers=8,verbose=TRUE))
-
+set.seed(1) # not needed AFAIK but for safety (e.g. SAMseq)
 res <- lapply(1:nreps, function(i) {   
   print(i)
   testSet <- as.character(randomSubsets[i,1:6])

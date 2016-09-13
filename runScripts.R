@@ -7,6 +7,11 @@ runDESeq2 <- function(e, retDDS=FALSE) {
   padj <- res$padj
   pvals[is.na(pvals)] <- 1
   pvals[rowSums(exprs(e)) == 0] <- NA
+  # p-value adjustment in DESeq2 does not occur
+  # over rows with all zero count, so this line is not needed:
+  ## padj <- p.adjust(pvals,method="BH")
+  # DESeq2 filters low count genes using genefilter.
+  # set the remaining NA (filtered) adjusted p-values to 1:
   padj[is.na(padj)] <- 1
   return(list(pvals=pvals, padj=padj, beta=beta))
 }
@@ -15,6 +20,7 @@ runEdgeR <- function(e) {
   design <- model.matrix(~ pData(e)$condition)
   dgel <- DGEList(exprs(e))
   dgel <- calcNormFactors(dgel)
+  # current recommendation (Sep 2016) according to vignette:
   dgel <- estimateDisp(dgel, design)
   edger.fit <- glmFit(dgel, design)
   edger.lrt <- glmLRT(edger.fit)
@@ -30,6 +36,7 @@ runEdgeRQL <- function(e) {
   design <- model.matrix(~ pData(e)$condition)
   dgel <- DGEList(exprs(e))
   dgel <- calcNormFactors(dgel)
+  # current recommendation (Sep 2016) according to vignette:
   dgel <- estimateDisp(dgel, design)
   edger.fit <- glmQLFit(dgel,design)
   edger.qlf <- glmQLFTest(edger.fit)

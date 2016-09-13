@@ -1,7 +1,62 @@
-load("sensFDR.rda")
-library("ggplot2")
-library("reshape")
+# data and scripts come from the Bottomly analysis in the DESeq2 paper:
 
+# paper:
+# https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8
+
+# data and scripts:
+# http://www-huber.embl.de/DESeq2paper/
+
+# data downloaded:
+# random_subsets.txt
+# bottomly_sumexp.RData
+
+# scripts downloaded:
+# diffExpr.R 
+# runScripts.R (edgeR code updated for 2016)
+
+# first run diffExpr.R and save result
+
+# now we take a look at the random subsets
+
+randomSubsets <- read.table("random_subsets.txt",strings=FALSE)
+randomSubsets <- as.matrix(randomSubsets)
+
+library(Biobase)
+library(SummarizedExperiment)
+load("bottomly_sumexp.RData")
+bottomly <- updateObject(bottomly)
+strain <- colData(bottomly)[,"strain",drop=FALSE]
+exper <- colData(bottomly)[,"experiment.number",drop=FALSE]
+exper[,1] <- factor(exper[,1])
+
+library(rafalib)
+bigpar(2,2)
+cols <- c("orange","purple","dodgerblue")
+image(sapply(1:30, function(i) as.integer(strain[randomSubsets[i,1:6],])),
+      col=cols, main="test cond")
+image(sapply(1:30, function(i) as.integer(exper[randomSubsets[i,1:6],])),
+      col=cols, main="test batch")
+image(sapply(1:30, function(i) as.integer(strain[randomSubsets[i,7:21],])),
+      col=cols, main="out cond")
+image(sapply(1:30, function(i) as.integer(exper[randomSubsets[i,7:21],])),
+      col=cols, main="out batch")
+
+# load the data from DE calling
+
+load("sensFDR.rda")
+
+# define some functions for compiling results
+
+getTestCalls <- function(alpha) {
+  t(sapply(1:nreps, function(i) sapply(namesAlgos, function(algo) {
+    sum((resTest[[i]][[algo]] < alpha))
+  })))
+}
+getHeldoutCalls <- function(alpha) {
+  t(sapply(1:nreps, function(i) sapply(namesAlgos, function(algo) {
+    sum((resHeldout[[i]][[algo]] < alpha))
+  })))
+}
 getSensitivity <- function(alpha) {
   t(sapply(1:nreps, function(i) sapply(namesAlgos, function(algo) {
     sigHeldout <- resHeldout[[i]][[algo]] < alpha
@@ -18,21 +73,24 @@ getFDR <- function(alpha) {
 }
 
 nreps <- length(resTest)
+test <- getTestCalls(.1)
+held <- getHeldoutCalls(.1)
 sens <- getSensitivity(.1)
 fdr <- getFDR(.1)
-boxplot(fdr)
-boxplot(sens)
 
-## fdr.m <- melt(as.data.frame(fdr))
-## sens.m <- melt(as.data.frame(sens))
-## names(fdr.m) <- c("algo","FDR")
-## data <- cbind(fdr.m, sens=sens.m[,2])
-## ggplot(data, aes(FDR, sens, col=algo)) + geom_point() + xlim(0,.5) + ylim(0,1)
+bigpar(1,2,mar=c(10,5,3,1))
+boxplot(test, las=2, ylim=c(0,5000), main="n=3 #pos")
+boxplot(held, las=2, ylim=c(0,5000), main="n=7/8 #pos")
 
-getOverlap <- function(a, b, alpha) {
+bigpar(1,2,mar=c(10,5,3,1))
+boxplot(fdr, las=2, ylim=c(0,.5), main="rough est. FDR")
+abline(h=0.1, col=rgb(1,0,0,.5), lwd=3)
+boxplot(sens, las=2, ylim=c(0,1), main="sensitivity")
+
+getOverlap <- function(a, b, res, alpha) {
   out <- sapply(1:nreps, function(i) {
-    a.padj <- resHeldout[[i]][[a]]
-    b.padj <- resHeldout[[i]][[b]]
+    a.padj <- res[[i]][[a]]
+    b.padj <- res[[i]][[b]]
     over <- sum(a.padj < alpha & b.padj < alpha)
     c(over/sum(a.padj < alpha), over/sum(b.padj < alpha))
   })
@@ -40,10 +98,21 @@ getOverlap <- function(a, b, alpha) {
   colnames(out) <- c(a,b)
   out
 }
-       
-boxplot(getOverlap("DESeq2","edgeR",.1), ylim=c(0,1))
-boxplot(getOverlap("DESeq2","edgeRQL",.1), ylim=c(0,1))
-boxplot(getOverlap("DESeq2","limma.voom",.1), ylim=c(0,1))
-boxplot(getOverlap("edgeR","edgeRQL",.1), ylim=c(0,1))
-boxplot(getOverlap("edgeR","limma.voom",.1), ylim=c(0,1))
-boxplot(getOverlap("edgeRQL","limma.voom",.1), ylim=c(0,1))
+
+bigpar(3,2,mar=c(5,5,1,1))
+ylims <- c(0.6, 1)
+boxplot(getOverlap("DESeq2","edgeR",resTest,.1), ylim=ylims)
+boxplot(getOverlap("DESeq2","edgeRQL",resTest,.1), ylim=ylims)
+boxplot(getOverlap("DESeq2","limma.voom",resTest,.1), ylim=ylims)
+boxplot(getOverlap("edgeR","edgeRQL",resTest,.1), ylim=ylims)
+boxplot(getOverlap("edgeR","limma.voom",resTest,.1), ylim=ylims)
+boxplot(getOverlap("edgeRQL","limma.voom",resTest,.1), ylim=ylims)
+
+bigpar(3,2,mar=c(5,5,1,1))
+ylims <- c(0.6, 1)
+boxplot(getOverlap("DESeq2","edgeR",resHeldout,.1), ylim=ylims)
+boxplot(getOverlap("DESeq2","edgeRQL",resHeldout,.1), ylim=ylims)
+boxplot(getOverlap("DESeq2","limma.voom",resHeldout,.1), ylim=ylims)
+boxplot(getOverlap("edgeR","edgeRQL",resHeldout,.1), ylim=ylims)
+boxplot(getOverlap("edgeR","limma.voom",resHeldout,.1), ylim=ylims)
+boxplot(getOverlap("edgeRQL","limma.voom",resHeldout,.1), ylim=ylims)
