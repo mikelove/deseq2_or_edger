@@ -1,8 +1,8 @@
 library("GenomicRanges")
 library("Biobase")
-#library("BiocParallel")
 library("SummarizedExperiment")
 load("bottomly_sumexp.RData")
+
 bottomly <- updateObject(bottomly)
 randomSubsets <- read.table("random_subsets.txt",strings=FALSE)
 se <- bottomly[,match(randomSubsets[1,],colnames(bottomly))]
@@ -12,13 +12,12 @@ eset <- ExpressionSet(assay(se),
 pData(eset)$condition <- pData(eset)$strain
 levels(pData(eset)$condition) <- c("A","B")
 
-library("DESeq")
 library("DESeq2")
 library("edgeR")
 library("limma")
 source("runScripts.R")
 
-algos <- list("DESeq2"=runDESeq2,"edgeR"=runEdgeR,"edgeRQL"=runEdgeRQL,"limma-voom"=runVoom)
+algos <- list("DESeq2"=runDESeq2,"edgeR"=runEdgeR,"edgeRQL"=runEdgeRQL,"limma.voom"=runVoom)
 
 namesAlgos <- names(algos)
 names(namesAlgos) <- namesAlgos
@@ -31,8 +30,6 @@ lfcHeldout <- list()
 nreps <- 30
 
 #register(MulticoreParam(workers=8,verbose=TRUE))
-
-nreps <- 3
 
 res <- lapply(1:nreps, function(i) {   
   print(i)
@@ -57,5 +54,5 @@ resHeldout <- lapply(res, "[[", "resHeldout")
 lfcTest <- lapply(res, "[[", "lfcTest")
 lfcHeldout <- lapply(res, "[[", "lfcHeldout")
 
-save(resTest,resHeldout,lfcTest,lfcHeldout,namesAlgos,file="sensitivityPrecision.RData")
+save(resTest,resHeldout,lfcTest,lfcHeldout,namesAlgos,file="sensFDR.rda")
 
