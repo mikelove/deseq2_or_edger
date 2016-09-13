@@ -1,26 +1,22 @@
-# data and scripts come from the Bottomly analysis in the DESeq2 paper:
-
+```{r}
+# data and scripts come from the Bottomly analysis in the DESeq2 paper.
+#
 # paper:
 # https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8
-
 # data and scripts:
 # http://www-huber.embl.de/DESeq2paper/
-
+#
 # data downloaded:
 # random_subsets.txt
 # bottomly_sumexp.RData
-
+#
 # scripts downloaded:
 # diffExpr.R 
 # runScripts.R (edgeR code updated for 2016)
-
-# first run diffExpr.R and save result
-
-# now we take a look at the random subsets
-
+#
+# quick look at the random subsets:
 randomSubsets <- read.table("random_subsets.txt",strings=FALSE)
 randomSubsets <- as.matrix(randomSubsets)
-
 library(Biobase)
 library(SummarizedExperiment)
 load("bottomly_sumexp.RData")
@@ -28,7 +24,10 @@ bottomly <- updateObject(bottomly)
 strain <- colData(bottomly)[,"strain",drop=FALSE]
 exper <- colData(bottomly)[,"experiment.number",drop=FALSE]
 exper[,1] <- factor(exper[,1])
+```
 
+```{r}
+# plot the test and heldout sets coloring condition and batch
 library(rafalib)
 bigpar(2,2)
 cols <- c("orange","purple","dodgerblue")
@@ -40,13 +39,13 @@ image(sapply(1:30, function(i) as.integer(strain[randomSubsets[i,7:21],])),
       col=cols, main="out cond")
 image(sapply(1:30, function(i) as.integer(exper[randomSubsets[i,7:21],])),
       col=cols, main="out batch")
+```
 
+```{r}
+# first run diffExpr.R and save result
 # load the data from DE calling
-
 load("sensFDR.rda")
-
 # define some functions for compiling results
-
 getTestCalls <- function(alpha) {
   t(sapply(1:nreps, function(i) sapply(namesAlgos, function(algo) {
     sum((resTest[[i]][[algo]] < alpha))
@@ -71,22 +70,28 @@ getFDR <- function(alpha) {
     mean((resHeldout[[i]][[algo]] > alpha)[sigTest])
   })))
 }
-
 nreps <- length(resTest)
 test <- getTestCalls(.1)
 held <- getHeldoutCalls(.1)
 sens <- getSensitivity(.1)
 fdr <- getFDR(.1)
+```
 
+```{r}
 bigpar(1,2,mar=c(10,5,3,1))
 boxplot(test, las=2, ylim=c(0,5000), main="n=3 #pos")
 boxplot(held, las=2, ylim=c(0,5000), main="n=7/8 #pos")
+```
 
+```{r}
 bigpar(1,2,mar=c(10,5,3,1))
 boxplot(fdr, las=2, ylim=c(0,.5), main="rough est. FDR")
 abline(h=0.1, col=rgb(1,0,0,.5), lwd=3)
 boxplot(sens, las=2, ylim=c(0,1), main="sensitivity")
+```
 
+```{r}
+# examine overlap for methods for test and heldout sets
 getOverlap <- function(a, b, res, alpha) {
   out <- sapply(1:nreps, function(i) {
     a.padj <- res[[i]][[a]]
@@ -98,7 +103,9 @@ getOverlap <- function(a, b, res, alpha) {
   colnames(out) <- c(a,b)
   out
 }
+```
 
+```{r}
 bigpar(3,2,mar=c(5,5,1,1))
 ylims <- c(0.6, 1)
 boxplot(getOverlap("DESeq2","edgeR",resTest,.1), ylim=ylims)
@@ -107,7 +114,9 @@ boxplot(getOverlap("DESeq2","limma.voom",resTest,.1), ylim=ylims)
 boxplot(getOverlap("edgeR","edgeRQL",resTest,.1), ylim=ylims)
 boxplot(getOverlap("edgeR","limma.voom",resTest,.1), ylim=ylims)
 boxplot(getOverlap("edgeRQL","limma.voom",resTest,.1), ylim=ylims)
+```
 
+```{r}
 bigpar(3,2,mar=c(5,5,1,1))
 ylims <- c(0.6, 1)
 boxplot(getOverlap("DESeq2","edgeR",resHeldout,.1), ylim=ylims)
@@ -116,3 +125,4 @@ boxplot(getOverlap("DESeq2","limma.voom",resHeldout,.1), ylim=ylims)
 boxplot(getOverlap("edgeR","edgeRQL",resHeldout,.1), ylim=ylims)
 boxplot(getOverlap("edgeR","limma.voom",resHeldout,.1), ylim=ylims)
 boxplot(getOverlap("edgeRQL","limma.voom",resHeldout,.1), ylim=ylims)
+```
