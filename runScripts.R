@@ -17,7 +17,7 @@ runDESeq2 <- function(e, retDDS=FALSE) {
 }
 
 runEdgeR <- function(e) {
-  design <- model.matrix(~ pData(e)$condition)
+  design <- model.matrix(~ condition, pData(e))
   dgel <- DGEList(exprs(e))
   dgel <- calcNormFactors(dgel)
   # current recommendation (Sep 2016) according to vignette:
@@ -29,11 +29,11 @@ runEdgeR <- function(e) {
   padj <- p.adjust(pvals,method="BH")
   padj[is.na(padj)] <- 1
   list(pvals=pvals, padj=padj,
-       beta=log2(exp(1)) * edger.fit$coefficients[,"pData(e)$conditionB"])
+       beta=log2(exp(1)) * edger.fit$coefficients[,"conditionB"])
 }
 
 runEdgeRQL <- function(e) {
-  design <- model.matrix(~ pData(e)$condition)
+  design <- model.matrix(~ condition, pData(e))
   dgel <- DGEList(exprs(e))
   dgel <- calcNormFactors(dgel)
   # current recommendation (Sep 2016) according to vignette:
@@ -45,7 +45,7 @@ runEdgeRQL <- function(e) {
   padj <- p.adjust(pvals,method="BH")
   padj[is.na(padj)] <- 1
   list(pvals=pvals, padj=padj,
-       beta=log2(exp(1)) * edger.fit$coefficients[,"pData(e)$conditionB"])
+       beta=log2(exp(1)) * edger.fit$coefficients[,"conditionB"])
 }
 
 runVoom <- function(e) {

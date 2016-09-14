@@ -14,6 +14,8 @@ eset <- ExpressionSet(assay(se),
                       AnnotatedDataFrame(as.data.frame(colData(se))))
 pData(eset)$condition <- pData(eset)$strain
 levels(pData(eset)$condition) <- c("A","B")
+pData(eset)$batch <- factor(pData(eset)$experiment.number)
+levels(pData(eset)$batch) <- 1:3
 
 library("DESeq2")
 library("edgeR")
@@ -21,7 +23,6 @@ library("limma")
 source("runScripts.R")
 
 algos <- list("DESeq2"=runDESeq2,"edgeR"=runEdgeR,"edgeRQL"=runEdgeRQL,"limma.voom"=runVoom)
-
 namesAlgos <- names(algos)
 names(namesAlgos) <- namesAlgos
 
