@@ -1,116 +1,8 @@
 # Bottomly plots
 
 
-```r
-# data and scripts come from the Bottomly analysis in the DESeq2 paper.
-#
-# paper:
-# https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8
-# data and scripts:
-# http://www-huber.embl.de/DESeq2paper/
-#
-# data downloaded:
-# random_subsets.txt
-# bottomly_sumexp.RData
-#
-# scripts downloaded:
-# diffExpr.R 
-# runScripts.R (edgeR code updated for 2016)
-#
-# quick look at the random subsets:
-randomSubsets <- read.table("random_subsets.txt",strings=FALSE)
-randomSubsets <- as.matrix(randomSubsets)
-library(Biobase)
-```
 
-```
-## Loading required package: BiocGenerics
-```
-
-```
-## Loading required package: parallel
-```
-
-```
-## 
-## Attaching package: 'BiocGenerics'
-```
-
-```
-## The following objects are masked from 'package:parallel':
-## 
-##     clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
-##     clusterExport, clusterMap, parApply, parCapply, parLapply,
-##     parLapplyLB, parRapply, parSapply, parSapplyLB
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     IQR, mad, xtabs
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     anyDuplicated, append, as.data.frame, cbind, colnames,
-##     do.call, duplicated, eval, evalq, Filter, Find, get, grep,
-##     grepl, intersect, is.unsorted, lapply, lengths, Map, mapply,
-##     match, mget, order, paste, pmax, pmax.int, pmin, pmin.int,
-##     Position, rank, rbind, Reduce, rownames, sapply, setdiff,
-##     sort, table, tapply, union, unique, unsplit
-```
-
-```
-## Welcome to Bioconductor
-## 
-##     Vignettes contain introductory material; view with
-##     'browseVignettes()'. To cite Bioconductor, see
-##     'citation("Biobase")', and for packages 'citation("pkgname")'.
-```
-
-```r
-library(SummarizedExperiment)
-```
-
-```
-## Loading required package: GenomicRanges
-```
-
-```
-## Loading required package: S4Vectors
-```
-
-```
-## Loading required package: stats4
-```
-
-```
-## 
-## Attaching package: 'S4Vectors'
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     colMeans, colSums, expand.grid, rowMeans, rowSums
-```
-
-```
-## Loading required package: IRanges
-```
-
-```
-## Loading required package: GenomeInfoDb
-```
-
-```r
-load("bottomly_sumexp.RData")
-bottomly <- updateObject(bottomly)
-strain <- colData(bottomly)[,"strain",drop=FALSE]
-exper <- colData(bottomly)[,"experiment.number",drop=FALSE]
-exper[,1] <- factor(exper[,1])
-```
+### Condition and batch in test and heldout
 
 
 ```r
@@ -131,41 +23,8 @@ image(sapply(1:30, function(i) as.integer(exper[randomSubsets[i,7:21],])),
 ![plot of chunk cond_batch](figure/cond_batch-1.png)
 
 
-```r
-# first run diffExpr.R and save result
-# load the data from DE calling
-load("sensFDR.rda")
-# define some functions for compiling results
-getTestCalls <- function(alpha) {
-  t(sapply(1:nreps, function(i) sapply(namesAlgos, function(algo) {
-    sum((resTest[[i]][[algo]] < alpha))
-  })))
-}
-getHeldoutCalls <- function(alpha) {
-  t(sapply(1:nreps, function(i) sapply(namesAlgos, function(algo) {
-    sum((resHeldout[[i]][[algo]] < alpha))
-  })))
-}
-getSensitivity <- function(alpha) {
-  t(sapply(1:nreps, function(i) sapply(namesAlgos, function(algo) {
-    sigHeldout <- resHeldout[[i]][[algo]] < alpha
-    if (sum(sigHeldout) == 0) return(0)
-    mean((resTest[[i]][[algo]] < alpha)[sigHeldout])
-  })))
-}
-getFDR <- function(alpha) {
-  t(sapply(1:nreps, function(i) sapply(namesAlgos, function(algo) {
-    sigTest <- resTest[[i]][[algo]] < alpha
-    if (sum(sigTest) == 0) return(0)
-    mean((resHeldout[[i]][[algo]] > alpha)[sigTest])
-  })))
-}
-nreps <- length(resTest)
-test <- getTestCalls(.1)
-held <- getHeldoutCalls(.1)
-sens <- getSensitivity(.1)
-fdr <- getFDR(.1)
-```
+
+### Number of calls
 
 
 ```r
@@ -176,31 +35,20 @@ boxplot(held, las=2, ylim=c(0,5000), main="n=7/8 #pos")
 
 ![plot of chunk num_calls](figure/num_calls-1.png)
 
+### FDR and sensitivity against heldout
+
 
 ```r
 bigpar(1,2,mar=c(10,5,3,1))
 boxplot(fdr, las=2, ylim=c(0,.5), main="rough est. FDR")
-abline(h=0.1, col=rgb(1,0,0,.5), lwd=3)
 boxplot(sens, las=2, ylim=c(0,1), main="sensitivity")
 ```
 
 ![plot of chunk fdr_sens](figure/fdr_sens-1.png)
 
 
-```r
-# examine overlap for methods for test and heldout sets
-getOverlap <- function(a, b, res, alpha) {
-  out <- sapply(1:nreps, function(i) {
-    a.padj <- res[[i]][[a]]
-    b.padj <- res[[i]][[b]]
-    over <- sum(a.padj < alpha & b.padj < alpha)
-    c(over/sum(a.padj < alpha), over/sum(b.padj < alpha))
-  })
-  out <- t(out)
-  colnames(out) <- c(a,b)
-  out
-}
-```
+
+### Overlap of method pairs in test
 
 
 ```r
@@ -215,6 +63,8 @@ boxplot(getOverlap("edgeRQL","limma.voom",resTest,.1), ylim=ylims)
 ```
 
 ![plot of chunk over_test](figure/over_test-1.png)
+
+### Overlap of method pairs in heldout
 
 
 ```r
