@@ -1,6 +1,7 @@
 # Bottomly plots
 
-```{r}
+
+```r
 # data and scripts come from the Bottomly analysis in the DESeq2 paper.
 #
 # paper:
@@ -20,7 +21,90 @@
 randomSubsets <- read.table("random_subsets.txt",strings=FALSE)
 randomSubsets <- as.matrix(randomSubsets)
 library(Biobase)
+```
+
+```
+## Loading required package: BiocGenerics
+```
+
+```
+## Loading required package: parallel
+```
+
+```
+## 
+## Attaching package: 'BiocGenerics'
+```
+
+```
+## The following objects are masked from 'package:parallel':
+## 
+##     clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+##     clusterExport, clusterMap, parApply, parCapply, parLapply,
+##     parLapplyLB, parRapply, parSapply, parSapplyLB
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     IQR, mad, xtabs
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     anyDuplicated, append, as.data.frame, cbind, colnames,
+##     do.call, duplicated, eval, evalq, Filter, Find, get, grep,
+##     grepl, intersect, is.unsorted, lapply, lengths, Map, mapply,
+##     match, mget, order, paste, pmax, pmax.int, pmin, pmin.int,
+##     Position, rank, rbind, Reduce, rownames, sapply, setdiff,
+##     sort, table, tapply, union, unique, unsplit
+```
+
+```
+## Welcome to Bioconductor
+## 
+##     Vignettes contain introductory material; view with
+##     'browseVignettes()'. To cite Bioconductor, see
+##     'citation("Biobase")', and for packages 'citation("pkgname")'.
+```
+
+```r
 library(SummarizedExperiment)
+```
+
+```
+## Loading required package: GenomicRanges
+```
+
+```
+## Loading required package: S4Vectors
+```
+
+```
+## Loading required package: stats4
+```
+
+```
+## 
+## Attaching package: 'S4Vectors'
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     colMeans, colSums, expand.grid, rowMeans, rowSums
+```
+
+```
+## Loading required package: IRanges
+```
+
+```
+## Loading required package: GenomeInfoDb
+```
+
+```r
 load("bottomly_sumexp.RData")
 bottomly <- updateObject(bottomly)
 strain <- colData(bottomly)[,"strain",drop=FALSE]
@@ -28,7 +112,8 @@ exper <- colData(bottomly)[,"experiment.number",drop=FALSE]
 exper[,1] <- factor(exper[,1])
 ```
 
-```{r cond_batch}
+
+```r
 # plot the test and heldout sets coloring condition and batch
 library(rafalib)
 bigpar(2,2)
@@ -43,7 +128,10 @@ image(sapply(1:30, function(i) as.integer(exper[randomSubsets[i,7:21],])),
       col=cols, main="out batch")
 ```
 
-```{r}
+![plot of chunk cond_batch](figure/cond_batch-1.png)
+
+
+```r
 # first run diffExpr.R and save result
 # load the data from DE calling
 load("sensFDR.rda")
@@ -79,20 +167,27 @@ sens <- getSensitivity(.1)
 fdr <- getFDR(.1)
 ```
 
-```{r num_calls}
+
+```r
 bigpar(1,2,mar=c(10,5,3,1))
 boxplot(test, las=2, ylim=c(0,5000), main="n=3 #pos")
 boxplot(held, las=2, ylim=c(0,5000), main="n=7/8 #pos")
 ```
 
-```{r fdr_sens}
+![plot of chunk num_calls](figure/num_calls-1.png)
+
+
+```r
 bigpar(1,2,mar=c(10,5,3,1))
 boxplot(fdr, las=2, ylim=c(0,.5), main="rough est. FDR")
 abline(h=0.1, col=rgb(1,0,0,.5), lwd=3)
 boxplot(sens, las=2, ylim=c(0,1), main="sensitivity")
 ```
 
-```{r}
+![plot of chunk fdr_sens](figure/fdr_sens-1.png)
+
+
+```r
 # examine overlap for methods for test and heldout sets
 getOverlap <- function(a, b, res, alpha) {
   out <- sapply(1:nreps, function(i) {
@@ -107,7 +202,8 @@ getOverlap <- function(a, b, res, alpha) {
 }
 ```
 
-```{r over_test}
+
+```r
 bigpar(3,2,mar=c(5,5,1,1))
 ylims <- c(0.6, 1)
 boxplot(getOverlap("DESeq2","edgeR",resTest,.1), ylim=ylims)
@@ -118,7 +214,10 @@ boxplot(getOverlap("edgeR","limma.voom",resTest,.1), ylim=ylims)
 boxplot(getOverlap("edgeRQL","limma.voom",resTest,.1), ylim=ylims)
 ```
 
-```{r over_heldout}
+![plot of chunk over_test](figure/over_test-1.png)
+
+
+```r
 bigpar(3,2,mar=c(5,5,1,1))
 ylims <- c(0.6, 1)
 boxplot(getOverlap("DESeq2","edgeR",resHeldout,.1), ylim=ylims)
@@ -128,3 +227,5 @@ boxplot(getOverlap("edgeR","edgeRQL",resHeldout,.1), ylim=ylims)
 boxplot(getOverlap("edgeR","limma.voom",resHeldout,.1), ylim=ylims)
 boxplot(getOverlap("edgeRQL","limma.voom",resHeldout,.1), ylim=ylims)
 ```
+
+![plot of chunk over_heldout](figure/over_heldout-1.png)
