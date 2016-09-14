@@ -1,9 +1,13 @@
 library("Biobase")
 library("SummarizedExperiment")
-load("bottomly_sumexp.RData")
 
+# http://www-huber.embl.de/DESeq2paper/data/bottomly_sumexp.RData
+load("bottomly_sumexp.RData")
 bottomly <- updateObject(bottomly)
+
+# http://www-huber.embl.de/DESeq2paper/script//bottomly/random_subsets.txt
 randomSubsets <- read.table("random_subsets.txt",strings=FALSE)
+
 se <- bottomly[,match(randomSubsets[1,],colnames(bottomly))]
 colData(se)$run <- colnames(se)
 eset <- ExpressionSet(assay(se),
