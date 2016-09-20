@@ -12,6 +12,16 @@ se <- bottomly[,match(randomSubsets[1,],colnames(bottomly))]
 colData(se)$run <- colnames(se)
 eset <- ExpressionSet(assay(se),
                       AnnotatedDataFrame(as.data.frame(colData(se))))
+
+###################################################
+# load Harold's count table
+counts <- readRDS("counts_table_bottomly.rds")
+# Harold's count table as eset:
+pdata <- as.data.frame(colData(se)[colnames(counts),])
+all(rownames(pdata) == colnames(counts))
+eset <- ExpressionSet(counts, AnnotatedDataFrame(pdata))
+###################################################
+
 pData(eset)$condition <- pData(eset)$strain
 levels(pData(eset)$condition) <- c("A","B")
 pData(eset)$batch <- factor(pData(eset)$experiment.number)

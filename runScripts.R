@@ -1,4 +1,7 @@
-runDESeq2 <- function(e, retDDS=FALSE) {
+runDESeq2 <- function(e) {
+
+  #e <- cpmFilter(e)
+
   dds <- DESeqDataSetFromMatrix(exprs(e), DataFrame(pData(e)), ~ condition)
   dds <- DESeq(dds,quiet=TRUE)
   res <- results(dds)
@@ -17,6 +20,9 @@ runDESeq2 <- function(e, retDDS=FALSE) {
 }
 
 runEdgeR <- function(e) {
+
+  #e <- cpmFilter(e)
+
   design <- model.matrix(~ condition, pData(e))
   dgel <- DGEList(exprs(e))
   dgel <- calcNormFactors(dgel)
@@ -33,6 +39,9 @@ runEdgeR <- function(e) {
 }
 
 runEdgeRQL <- function(e) {
+
+  #e <- cpmFilter(e)
+  
   design <- model.matrix(~ condition, pData(e))
   dgel <- DGEList(exprs(e))
   dgel <- calcNormFactors(dgel)
@@ -49,6 +58,9 @@ runEdgeRQL <- function(e) {
 }
 
 runVoom <- function(e) {
+
+  #e <- cpmFilter(e)
+  
   design <- model.matrix(~ condition, pData(e))
   dgel <- DGEList(exprs(e))
   dgel <- calcNormFactors(dgel)
@@ -61,4 +73,16 @@ runVoom <- function(e) {
   padj <- p.adjust(pvals,method="BH")
   padj[is.na(padj)] <- 1
   list(pvals=pvals, padj=padj, beta=tt$logFC)
+}
+
+cpmFilter <- function(e) {
+  dgel <- DGEList(exprs(e))
+  # this should actually be min(table(e$condition))
+  # instead of 2 according to edgeR docs...
+  keep <- rowSums(cpm(dgel) > 1) >= 2
+  # if not 'keep', send the whole row to 0.
+  # this means they will not be included in BH test correction
+  # and will propogate through all methods as an adjusted p-value of 1.
+  exprs(e)[!keep,] <- 0L
+  e
 }
