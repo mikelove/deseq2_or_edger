@@ -35,12 +35,8 @@ source("runScripts.R")
 algos <- list("DESeq2"=runDESeq2,"edgeR"=runEdgeR,"edgeRQL"=runEdgeRQL,"limma.voom"=runVoom)
 namesAlgos <- names(algos)
 names(namesAlgos) <- namesAlgos
-
 resTest <- list()
 resHeldout <- list()
-lfcTest <- list()
-lfcHeldout <- list()
-
 nreps <- 30
 
 set.seed(1) # not needed AFAIK but for safety (e.g. SAMseq)
@@ -51,21 +47,15 @@ res <- lapply(1:nreps, function(i) {
   eTest <- eset[,testSet]
   eHeldout <- eset[,heldOutSet]
   st <- system.time({
-    resTest0 <- lapply(namesAlgos, function(n) algos[[n]](eTest))
-    resHeldout0 <- lapply(namesAlgos, function(n) algos[[n]](eHeldout))
+    resTest <- as.data.frame(lapply(namesAlgos, function(n) algos[[n]](eTest)))
+    resHeldout <- as.data.frame(lapply(namesAlgos, function(n) algos[[n]](eHeldout)))
   })
   print(paste(round(unname(st[3])),"seconds"))
-  resTest <- as.data.frame(lapply(resTest0, function(z) z$padj))
-  resHeldout <- as.data.frame(lapply(resHeldout0, function(z) z$padj))
-  lfcTest <- as.data.frame(lapply(resTest0, function(z) z$beta))
-  lfcHeldout <- as.data.frame(lapply(resHeldout0, function(z) z$beta))
-  list(resTest=resTest,resHeldout=resHeldout,lfcTest=lfcTest,lfcHeldout=lfcHeldout)
+  list(resTest=resTest,resHeldout=resHeldout)
 })
 
 resTest <- lapply(res, "[[", "resTest")
 resHeldout <- lapply(res, "[[", "resHeldout")
-lfcTest <- lapply(res, "[[", "lfcTest")
-lfcHeldout <- lapply(res, "[[", "lfcHeldout")
 
-save(resTest,resHeldout,lfcTest,lfcHeldout,namesAlgos,file="sensFDR.rda")
+save(resTest,resHeldout,namesAlgos,file="sensFDR_no_filter.rda")
 
