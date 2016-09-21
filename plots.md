@@ -56,7 +56,7 @@ lines()
 
 ```r
 bigpar(3,2,mar=c(5,5,1,1))
-ylims <- c(0.6, 1)
+ylims <- c(0, 1)
 boxplot(getOverlap("DESeq2","edgeR",resTest,.1), ylim=ylims)
 boxplot(getOverlap("DESeq2","edgeRQL",resTest,.1), ylim=ylims)
 boxplot(getOverlap("DESeq2","limma.voom",resTest,.1), ylim=ylims)
