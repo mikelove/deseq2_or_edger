@@ -20,8 +20,6 @@ image(sapply(1:30, function(i) as.integer(exper[randomSubsets[i,7:21],])),
       col=cols, main="out batch")
 ```
 
-![plot of chunk cond_batch](figure/cond_batch-1.png)
-
 
 
 ### Number of calls
@@ -39,9 +37,14 @@ boxplot(held, las=2, ylim=c(0,5000), main="n=7/8 #pos")
 
 
 ```r
-bigpar(1,2,mar=c(10,5,3,1))
-boxplot(fdr, las=2, ylim=c(0,.5), main="rough est. FDR")
-boxplot(sens, las=2, ylim=c(0,1), main="sensitivity")
+lines <- function() abline(h=0:10/10,col=rgb(0,0,0,.1))
+bigpar(1,3,mar=c(10,5,3,1))
+boxplot(fdr, las=2, ylim=c(0,0.5), main="rough est. FDR")
+lines()
+boxplot(fdr, las=2, ylim=c(0,1), main="rough est. FDR")
+lines()
+boxplot(sens, las=2, ylim=c(0,0.5), main="sensitivity")
+lines()
 ```
 
 ![plot of chunk fdr_sens](figure/fdr_sens-1.png)

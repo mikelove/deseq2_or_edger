@@ -14,12 +14,14 @@ eset <- ExpressionSet(assay(se),
                       AnnotatedDataFrame(as.data.frame(colData(se))))
 
 ###################################################
-# load Harold's count table
-counts <- readRDS("counts_table_bottomly.rds")
-# Harold's count table as eset:
-pdata <- as.data.frame(colData(se)[colnames(counts),])
-all(rownames(pdata) == colnames(counts))
-eset <- ExpressionSet(counts, AnnotatedDataFrame(pdata))
+if (FALSE) {
+  # load Harold's count table
+  counts <- readRDS("counts_table_bottomly.rds")
+  # Harold's count table as eset:
+  pdata <- as.data.frame(colData(se)[colnames(counts),])
+  all(rownames(pdata) == colnames(counts))
+  eset <- ExpressionSet(counts, AnnotatedDataFrame(pdata))
+}
 ###################################################
 
 pData(eset)$condition <- pData(eset)$strain
@@ -30,8 +32,8 @@ levels(pData(eset)$batch) <- 1:3
 library("DESeq2")
 library("edgeR")
 library("limma")
-source("runScripts.R")
 
+source("runScripts.R")
 algos <- list("DESeq2"=runDESeq2,"edgeR"=runEdgeR,"edgeRQL"=runEdgeRQL,"limma.voom"=runVoom)
 namesAlgos <- names(algos)
 names(namesAlgos) <- namesAlgos
@@ -57,5 +59,5 @@ res <- lapply(1:nreps, function(i) {
 resTest <- lapply(res, "[[", "resTest")
 resHeldout <- lapply(res, "[[", "resHeldout")
 
-save(resTest,resHeldout,namesAlgos,file="sensFDR_no_filter.rda")
+save(resTest,resHeldout,namesAlgos,file="sensFDR.rda")
 

@@ -1,5 +1,6 @@
 runDESeq2 <- function(e) {
   padj <- rep(NA, nrow(e))
+  # cpm=FALSE means don't do any filtering
   keep <- cpmFilter(e, cpm=FALSE)
   e <- e[keep,]
 
@@ -15,7 +16,7 @@ runDESeq2 <- function(e) {
 
 runEdgeR <- function(e) {
   padj <- rep(NA, nrow(e))
-  keep <- cpmFilter(e, cpm=FALSE)
+  keep <- cpmFilter(e, cpm=TRUE)
   e <- e[keep,]
 
   design <- model.matrix(~ condition, pData(e))
@@ -34,7 +35,7 @@ runEdgeR <- function(e) {
 
 runEdgeRQL <- function(e) {
   padj <- rep(NA, nrow(e))
-  keep <- cpmFilter(e, cpm=FALSE)
+  keep <- cpmFilter(e, cpm=TRUE)
   e <- e[keep,]
   
   design <- model.matrix(~ condition, pData(e))
@@ -53,7 +54,7 @@ runEdgeRQL <- function(e) {
 
 runVoom <- function(e) {
   padj <- rep(NA, nrow(e))
-  keep <- cpmFilter(e, cpm=FALSE)
+  keep <- cpmFilter(e, cpm=TRUE)
   e <- e[keep,]
   
   design <- model.matrix(~ condition, pData(e))
