@@ -73,8 +73,11 @@ runVoom <- function(e) {
 
 cpmFilter <- function(e, cpm=TRUE) {
   if (cpm) {
+    # this is the filtering recommendation from Gordon Smyth
+    # https://support.bioconductor.org/p/85511/#85514
+    L <- min(colSums(exprs(e))/1e6)
     dgel <- DGEList(exprs(e))
-    return(rowSums(cpm(dgel) > 1) >= min(table(e$condition)))
+    return(rowSums(cpm(dgel) > 10/L) >= min(table(e$condition)))
   } else {
     return(rowSums(exprs(e)) > 0)
   }

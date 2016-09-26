@@ -21,6 +21,16 @@ image(sapply(1:30, function(i) as.integer(exper[randomSubsets[i,7:21],])),
 ```
 
 
+```
+## 
+## Attaching package: 'rafalib'
+```
+
+```
+## The following object is masked from 'package:devtools':
+## 
+##     install_bioc
+```
 
 ### Number of calls
 
@@ -42,7 +52,7 @@ round(colMeans(test))
 
 ```
 ##     DESeq2      edgeR    edgeRQL limma.voom 
-##        736        750        415        403
+##        736        760        424        412
 ```
 
 ```r
@@ -51,7 +61,7 @@ round(colMeans(held))
 
 ```
 ##     DESeq2      edgeR    edgeRQL limma.voom 
-##       3047       2339       2150       2064
+##       3047       2293       2106       2025
 ```
 
 ### FDR and sensitivity against heldout
@@ -79,7 +89,7 @@ Mean of the rough estimate of FDR (%) using the 7 vs 8 heldout set as ground tru
 
 ```
 ##     DESeq2      edgeR    edgeRQL limma.voom 
-##       13.5       19.4       12.1       11.5
+##       13.5       22.0       15.2       14.7
 ```
 
 
