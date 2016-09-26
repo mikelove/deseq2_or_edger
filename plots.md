@@ -33,6 +33,27 @@ boxplot(held, las=2, ylim=c(0,5000), main="n=7/8 #pos")
 
 ![plot of chunk num_calls](figure/num_calls-1.png)
 
+Mean of calls in test set (n=3) and heldout set (n=7/8)
+
+
+```r
+round(colMeans(test))
+```
+
+```
+##     DESeq2      edgeR    edgeRQL limma.voom 
+##        736        750        415        403
+```
+
+```r
+round(colMeans(held))
+```
+
+```
+##     DESeq2      edgeR    edgeRQL limma.voom 
+##       3047       2339       2150       2064
+```
+
 ### FDR and sensitivity against heldout
 
 

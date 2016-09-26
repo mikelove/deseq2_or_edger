@@ -90,6 +90,13 @@ boxplot(test, las=2, ylim=c(0,5000), main="n=3 #pos")
 boxplot(held, las=2, ylim=c(0,5000), main="n=7/8 #pos")
 ```
 
+Mean of calls in test set (n=3) and heldout set (n=7/8)
+
+```{r}
+round(colMeans(test))
+round(colMeans(held))
+```
+
 ### FDR and sensitivity against heldout
 
 ```{r fdr_sens}
