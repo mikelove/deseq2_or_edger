@@ -74,9 +74,7 @@ runVoom <- function(e) {
 cpmFilter <- function(e, cpm=TRUE) {
   if (cpm) {
     dgel <- DGEList(exprs(e))
-    # this should actually be min(table(e$condition))
-    # instead of 2 according to edgeR docs...
-    return(rowSums(cpm(dgel) > 1) >= 2)
+    return(rowSums(cpm(dgel) > 1) >= min(table(e$condition)))
   } else {
     return(rowSums(exprs(e)) > 0)
   }

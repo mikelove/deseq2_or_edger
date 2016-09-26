@@ -103,6 +103,12 @@ boxplot(sens, las=2, ylim=c(0,0.5), main="sensitivity")
 lines()
 ```
 
+Mean of the rough estimate of FDR (%) using the 7 vs 8 heldout set as ground truth:
+
+```{r}
+100 * round(colMeans(fdr),3)
+```
+
 ```{r echo=FALSE}
 # examine overlap for methods for test and heldout sets
 getOverlap <- function(a, b, res, alpha) {

@@ -49,6 +49,18 @@ lines()
 
 ![plot of chunk fdr_sens](figure/fdr_sens-1.png)
 
+Mean of the rough estimate of FDR (%) using the 7 vs 8 heldout set as ground truth:
+
+
+```r
+100 * round(colMeans(fdr),3)
+```
+
+```
+##     DESeq2      edgeR    edgeRQL limma.voom 
+##       13.5       19.4       12.1       11.5
+```
+
 
 
 ### Overlap of method pairs in test
