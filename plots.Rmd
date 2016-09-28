@@ -165,9 +165,11 @@ edger.padj <- resHeldout[[1]][["edgeR"]]
 deseq2.exclusive <- deseq2.padj < 0.1 & edger.padj > 0.1
 table(deseq2.exclusive)
 names(deseq2.padj) <- rownames(bottomly)
+names(edger.padj) <- rownames(bottomly)
 exc.padj <- deseq2.padj[deseq2.exclusive]
 top.padj <- head(sort(exc.padj),4)
-edger.padj[names(top.padj)] # filtered by edgeR
+edger.padj[names(top.padj)] # top were likely filtered by edgeR
+table(edger.padj[names(exc.padj)] == 1) # how many likely filtered?
 library(DESeq2)
 dds <- DESeqDataSet(bottomly, ~strain)
 dds <- estimateSizeFactors(dds)

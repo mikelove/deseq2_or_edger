@@ -136,13 +136,27 @@ table(deseq2.exclusive)
 
 ```r
 names(deseq2.padj) <- rownames(bottomly)
+names(edger.padj) <- rownames(bottomly)
 exc.padj <- deseq2.padj[deseq2.exclusive]
 top.padj <- head(sort(exc.padj),4)
-edger.padj[names(top.padj)] # filtered by edgeR
+edger.padj[names(top.padj)] # top were likely filtered by edgeR
 ```
 
 ```
-## [1] NA NA NA NA
+## ENSMUSG00000090767 ENSMUSG00000085235 ENSMUSG00000073607 
+##                  1                  1                  1 
+## ENSMUSG00000073166 
+##                  1
+```
+
+```r
+table(edger.padj[names(exc.padj)] == 1) # how many likely filtered?
+```
+
+```
+## 
+## FALSE  TRUE 
+##   159   443
 ```
 
 ```r
