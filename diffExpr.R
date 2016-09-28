@@ -41,18 +41,18 @@ resTest <- list()
 resHeldout <- list()
 nreps <- 30
 
+library(pbapply) # for progress bar
+
 set.seed(1) # not needed AFAIK but for safety (e.g. SAMseq)
-res <- lapply(1:nreps, function(i) {   
-  print(i)
+res <- pblapply(1:nreps, function(i) {   
   testSet <- as.character(randomSubsets[i,1:6])
   heldOutSet <- as.character(randomSubsets[i,-(1:6)])
   eTest <- eset[,testSet]
   eHeldout <- eset[,heldOutSet]
-  st <- system.time({
-    resTest <- as.data.frame(lapply(namesAlgos, function(n) algos[[n]](eTest)))
-    resHeldout <- as.data.frame(lapply(namesAlgos, function(n) algos[[n]](eHeldout)))
-  })
-  print(paste(round(unname(st[3])),"seconds"))
+  resTest <- as.data.frame(lapply(namesAlgos, 
+               function(n) algos[[n]](eTest)))
+  resHeldout <- as.data.frame(lapply(namesAlgos, 
+                  function(n) algos[[n]](eHeldout)))
   list(resTest=resTest,resHeldout=resHeldout)
 })
 
