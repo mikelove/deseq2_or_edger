@@ -1,6 +1,6 @@
 # Bottomly plots
 
-```{r eval=FALSE, echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE}
 # data and scripts come from the Bottomly analysis in the DESeq2 paper.
 #
 # paper:
@@ -30,7 +30,7 @@ exper[,1] <- factor(exper[,1])
 
 ### Condition and batch in test and heldout
 
-```{r cond_batch, eval=FALSE}
+```{r cond_batch}
 # plot the test and heldout sets coloring condition and batch
 library(rafalib)
 bigpar(2,2)
@@ -49,7 +49,7 @@ image(sapply(1:30, function(i) as.integer(exper[randomSubsets[i,7:21],])),
 library(rafalib)
 # first run diffExpr.R and save result
 # load the data from DE calling
-# load("sensFDR.rda")
+load("sensFDR.rda")
 # define some functions for compiling results
 getTestCalls <- function(alpha) {
   t(sapply(1:nreps, function(i) sapply(namesAlgos, function(algo) {
@@ -156,3 +156,36 @@ boxplot(getOverlap("edgeR","edgeRQL",resHeldout,.1), ylim=ylims)
 boxplot(getOverlap("edgeR","limma.voom",resHeldout,.1), ylim=ylims)
 boxplot(getOverlap("edgeRQL","limma.voom",resHeldout,.1), ylim=ylims)
 ```
+
+Which genes called by DESeq2 but not be edgeR in the heldout set? 
+Maybe we can characterize these. We'll just look at the first iteration,
+and look at the top genes called exclusively by DESeq2.
+
+```{r message=FALSE}
+deseq2.padj <- resHeldout[[1]][["DESeq2"]]
+edger.padj <- resHeldout[[1]][["edgeR"]]
+deseq2.exclusive <- deseq2.padj < 0.1 & edger.padj > 0.1
+table(deseq2.exclusive)
+names(deseq2.padj) <- rownames(bottomly)
+exc.padj <- deseq2.padj[deseq2.exclusive]
+top.padj <- head(sort(exc.padj),4)
+edger.padj[names(top.padj)] # filtered by edgeR
+library(DESeq2)
+dds <- DESeqDataSet(bottomly, ~strain)
+dds <- estimateSizeFactors(dds)
+heldout.idx <- randomSubsets[1,7:21]
+```
+
+It appears these didn't pass the CPM filter.
+
+```{r, deseq2.counts}
+par(mfrow=c(4,2))
+for (i in 1:4) {
+  cts <- counts(dds, normalized=TRUE)[names(top.padj)[i],]
+  stripchart(cts[heldout.idx] ~ strain[heldout.idx,], 
+             method="jitter", vertical=TRUE, ylab="")
+  stripchart(cts ~ dds$strain, 
+             method="jitter", vertical=TRUE, ylab="")
+}
+```
+

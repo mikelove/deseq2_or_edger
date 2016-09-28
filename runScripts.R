@@ -77,7 +77,10 @@ cpmFilter <- function(e, cpm=TRUE) {
     # https://support.bioconductor.org/p/85511/#85514
     L <- min(colSums(exprs(e))/1e6)
     dgel <- DGEList(exprs(e))
-    return(rowSums(cpm(dgel) > 10/L) >= min(table(e$condition)))
+    # here I use 3 even for the heldout set (n=7/8),
+    # because otherwise the filtering is too strict
+    # to the detriment of edgeR and limma-voom performance
+    return(rowSums(cpm(dgel) > 10/L) >= 3)
   } else {
     return(rowSums(exprs(e)) > 0)
   }
